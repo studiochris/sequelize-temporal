@@ -4,7 +4,11 @@ var temporalDefaultOptions = {
   // runs the insert within the sequelize hook chain, disable
   // for increased performance
   blocking: true,
-  full: false
+  full: false,
+  modelPrefix: '',
+  modelSuffix:'History',
+  idColumn: 'hid',
+  dateColumn: 'archivedAt'
 };
 
 var excludeAttributes = function(obj, attrsToExclude){
@@ -17,18 +21,18 @@ var Temporal = function(model, sequelize, temporalOptions){
 
   var Sequelize = sequelize.Sequelize;
 
-  var historyName = model.name + 'History';
+  var historyName = [temporalOptions.modelPrefix, model.name, temporalOptions.modelSuffix].join('');
   //var historyName = model.getTableName() + 'History';
   //var historyName = model.options.name.singular + 'History';
 
   var historyOwnAttrs = {
-    hid: {
+    [temporalOptions.idColumn]: {
       type:          Sequelize.BIGINT,
       primaryKey:    true,
       autoIncrement: true,
       unique: true
     },
-    archivedAt: {
+    [temporalOptions.dateColumn]: {
       type: Sequelize.DATE,
       allowNull: false,
       defaultValue: Sequelize.NOW

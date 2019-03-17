@@ -332,4 +332,102 @@ describe('Read-only API', function(){
 
   });
 
+  describe('tests default and custom options for modelPrefix, modelSuffix, idColumn, and dateColumn', function(){
+    var defaultOptions = {};
+    var customOptions = {modelPrefix: '_', modelSuffix: 'AuditTrail', idColumn: '_atid', dateColumn: '_auditedAt'};
+    var someCustomOptions = {modelPrefix: '_', dateColumn: 'hRecordedAt'};
+
+    var DefaultOptionsModel, DefaultOptionsHistory;
+    var CustomOptionsModel, CustomOptionsHistory;
+    var SomeCustomOptionsModel, SomeCustomOptionsHistory;
+
+    before(function() {
+      // overwrites the old SQLite DB
+      sequelize = new Sequelize('', '', '', {
+        dialect: 'sqlite',
+        storage: __dirname + '/.test.sqlite'
+      });
+
+      DefaultOptionsModel = Temporal(sequelize.define('DefaultOptions', {
+        name: Sequelize.TEXT
+      }), sequelize, defaultOptions);
+
+      CustomOptionsModel = Temporal(sequelize.define('CustomOptions', {
+        name: Sequelize.TEXT
+      }), sequelize, customOptions);
+
+      SomeCustomOptionsModel = Temporal(sequelize.define('SomeCustomOptions', {
+        name: Sequelize.TEXT
+      }), sequelize, someCustomOptions);
+
+      DefaultOptionsHistory = sequelize.models.DefaultOptionsHistory;
+      CustomOptionsHistory = sequelize.models._CustomOptionsAuditTrail;
+      SomeCustomOptionsHistory = sequelize.models._SomeCustomOptionsHistory;
+
+      return sequelize.sync({ force: true });
+    });
+
+    it('should have a model at key `DefaultOptionsHistory`', function() {
+      return assert.exists(DefaultOptionsHistory, '`DefaultOptionsHistory` exists')
+    });
+
+    it('should have `hid` as the autoIncrementAttribute using default options', function(){
+      return assert.equal(DefaultOptionsHistory.autoIncrementAttribute, 'hid', '`autoIncrementAttribute` is `hid` on `DefaultOptionsHistory` model');
+    });
+
+    it('should have an `archivedAt` attribute using default options', function(){
+      return assert.exists(DefaultOptionsHistory.attributes.archivedAt, '`archivedAt` exists on `DefaultOptionsHistory` model');
+    });
+
+    it('should have a model at key `_CustomOptionsAuditTrail`', function() {
+      return assert.exists(CustomOptionsHistory, '`_CustomOptionsAuditTrail` exists');
+    });
+
+    it('should have `_atid` as the autoIncrementAttribute using `customOptions`', function(){
+      return assert.equal(CustomOptionsHistory.autoIncrementAttribute, '_atid', '`autoIncrementAttribute` is `_atid` on  `CustomtOptionsHistory` model');
+    });
+
+    it('should have an `_auditedAt` attribute using `customOptions`', function(){
+      return assert.exists(CustomOptionsHistory.attributes._auditedAt, '`_auditedAt` exists on `CustomOptionsHistory` model');
+    });
+
+    it(`should still write to custom-named history models`, function(){
+      return CustomOptionsModel.create({name: 'custom'})
+      .then(function(co) {
+        return co.update({name: 'still custom'});
+      })
+      .then(function(co) {
+        return co.update({name: 'still custom again'});
+      })
+      .then(function(){
+        return CustomOptionsModel.findAll();
+      })
+      .then(function(cos){
+        assert.equal(cos.length, 1, 'still only one entry in CustomOptionsModel table');
+        assert.equal(cos[0].name, 'still custom again', 'original model is up to date');
+      })
+      .then(function() {
+        return CustomOptionsHistory.findAll();
+      })
+      .then(function(histories) {
+        assert.equal(histories.length, 2, 'two old enties in DB');
+        assert.equal(histories[0].name, 'custom', 'first version saved');
+        assert.equal(histories[1].name, 'still custom', 'second version saved');
+      });
+    });
+
+    it('should have a model at key `_SomeCustomOptionsHistory`', function() {
+      return assert.exists(SomeCustomOptionsHistory, '`_SomeCustomOptionsHistory` exists');
+    });
+
+    it('should have `hid` as the autoIncrementAttribute using `someCustomOptions`, which doesn\'t set a custom `idColumn`', function(){
+      return assert.equal(SomeCustomOptionsHistory.autoIncrementAttribute, 'hid', '`autoIncrementAttribute` is `hid` on `SomeCustomOptionsHistory` model');
+    });
+
+    it('should have an `hRecordedAt` attribute using `someCustomOptions`', function(){
+      return assert.exists(SomeCustomOptionsHistory.attributes.hRecordedAt, '`hRecordedAt` exists on `SomeCustomOptionsHistory` model');
+    });
+
+  });
+
 });
