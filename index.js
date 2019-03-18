@@ -27,8 +27,8 @@ var Temporal = function(model, sequelize, temporalOptions){
 
   var historyOwnAttrs = {
     [temporalOptions.idColumn]: {
-      type:          Sequelize.BIGINT,
-      primaryKey:    true,
+      type: Sequelize.BIGINT,
+      primaryKey: true,
       autoIncrement: true,
       unique: true
     },
@@ -93,6 +93,7 @@ var Temporal = function(model, sequelize, temporalOptions){
   // all hooks just create a copy
   if (temporalOptions.full) {
     model.addHook('afterCreate', insertHook);
+    //according to https://github.com/sequelize/sequelize/issues/6938#issuecomment-264161628, calling update on a model is known as a bulk update, afterUpdate does not appear to be firing
     model.addHook('afterUpdate', insertHook);
     model.addHook('afterDestroy', insertHook);
     model.addHook('afterRestore', insertHook);

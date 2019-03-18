@@ -14,7 +14,9 @@ Temporal tables maintain __historical versions__ of data. Modifying operations (
 - undo functionalities
 - track interactions (customer support)
 
-Under the hood a history table with the same structure, but without constraints is created.
+Under the hood, a History table is created using the same structure as the input model, only without constraints. The history table also includes a new primary key (default: `hid`) and an additional date column (default: `archivedAt`)
+
+Under the hood a history table with the same structure, without constraints, and with  is created.
 
 The normal singular/plural naming scheme in Sequelize is used:
 
