@@ -1,8 +1,6 @@
 Temporal Tables for Sequelize
 =============================
 
-
-
 What is it?
 -----------
 
@@ -35,14 +33,14 @@ How to use
 
 ### 1) Import `sequelize-temporal`
 
-```
+```js
 var Sequelize = require('sequelize');
 var Temporal = require('sequelize-temporal');
 ```
 
 Create a sequelize instance and your models, e.g.
 
-```
+```js
 var sequelize = new Sequelize('', '', '', {
 	dialect: 'sqlite',
 	storage: __dirname + '/.test.sqlite'
@@ -51,14 +49,14 @@ var sequelize = new Sequelize('', '', '', {
 
 ### 2) Add the *Temporal* feature to your models
 
-```
+```js
 var User = Temporal(sequelize.define('User'), sequelize);
 ```
 
 The output of `temporal` is its input model, so assigning it's output to your
 Model is not necessary, hence it's just the lazy version of:
 
-```
+```js
 var User = sequelize.define('User', { ...columns }, { ...options }); // Sequelize Docu
 Temporal(User, sequelize);
 ```
@@ -72,7 +70,7 @@ The default syntax for `Temporal` is:
 
 whereas the options are listed here (with default value).
 
-The default values for options maintain backward compatibility with previous versions of sequelize-temporal.
+The default values for options maintain backward compatibility with previous versions of `sequelize-temporal`.
 
 | Option        | Type    | Default Value  | Description                                                  |
 | ------------- | ------- | -------------- | ------------------------------------------------------------ |
@@ -106,8 +104,6 @@ If you only use Postgres, you might want to have a look at the [Temporal Table](
 License
 -------
 
-
-
 The MIT License (MIT)
 
 Copyright (c) 2015 BonaVal and other contributors.
@@ -130,10 +126,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
-
 -------
-
-
 
 Forked from https://github.com/bonaval/sequelize-temporal
