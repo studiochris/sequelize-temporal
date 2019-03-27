@@ -93,12 +93,14 @@ var Temporal = function(model, sequelize, temporalOptions){
   // all hooks just create a copy
   if (temporalOptions.full) {
     model.addHook('afterCreate', insertHook);
-    //according to https://github.com/sequelize/sequelize/issues/6938#issuecomment-264161628, calling update on a model is known as a bulk update, afterUpdate does not appear to be firing
+    model.addHook('afterUpsert', insertHook);
+    // according to https://github.com/sequelize/sequelize/issues/6938#issuecomment-264161628, calling update on a model is known as a bulk update, afterUpdate does not appear to be firing
     model.addHook('afterUpdate', insertHook);
     model.addHook('afterDestroy', insertHook);
     model.addHook('afterRestore', insertHook);
   } else {
     model.addHook('beforeUpdate', insertHook);
+    model.addHook('beforeUpsert'), insertHook)
     model.addHook('beforeDestroy', insertHook);
   }
 
@@ -110,6 +112,7 @@ var Temporal = function(model, sequelize, temporalOptions){
   };
 
   modelHistory.addHook('beforeUpdate', readOnlyHook);
+  modelHistory.addHook('beforeUpsert', readOnlyHook);
   modelHistory.addHook('beforeDestroy', readOnlyHook);
 
   return model;

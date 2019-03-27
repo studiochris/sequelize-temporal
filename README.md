@@ -1,14 +1,14 @@
-Temporal tables for Sequelize
+Temporal Tables for Sequelize
 =============================
-(aka "Historical records")
 
-[![Build Status](https://travis-ci.org/bonaval/sequelize-temporal.svg?branch=master)](https://travis-ci.org/bonaval/sequelize-temporal) [![Dependency Status](https://david-dm.org/bonaval/sequelize-temporal.svg)](https://david-dm.org/bonaval/sequelize-temporal) [![NPM version](https://img.shields.io/npm/v/sequelize-temporal.svg)](https://www.npmjs.com/package/sequelize-temporal)
 
 
 What is it?
 -----------
 
-Temporal tables maintain __historical versions__ of data. Modifying operations (UPDATE, DELETE) on these tables don't cause permanent changes to entries, but create new versions of them. Hence this might be used to:
+`sequelize-temporal` (Temporal) creates and maintains insertions to history tables for Sequelize models. These tables hold __historical versions__ of Sequelize instances.
+
+Modifying operations (UPDATE, DELETE) on these tables don't cause permanent changes to entries, but create new versions of them. Hence this might be used to:
 
 - log changes (security/auditing)
 - undo functionalities
@@ -49,7 +49,7 @@ var sequelize = new Sequelize('', '', '', {
 });
 ```
 
-### 2) Add the *temporal* feature to your models
+### 2) Add the *Temporal* feature to your models
 
 ```
 var User = Temporal(sequelize.define('User'), sequelize);
@@ -59,7 +59,7 @@ The output of `temporal` is its input model, so assigning it's output to your
 Model is not necessary, hence it's just the lazy version of:
 
 ```
-var User = sequelize.define('User', {.types.}, {.options.}); // Sequelize Docu
+var User = sequelize.define('User', { ...columns }, { ...options }); // Sequelize Docu
 Temporal(User, sequelize);
 ```
 
@@ -72,23 +72,22 @@ The default syntax for `Temporal` is:
 
 whereas the options are listed here (with default value).
 
-```js
-{
-  /* runs the insert within the sequelize hook chain, disable
-  for increased performance without warranties */
-  blocking: true,
-  /* By default sequelize-temporal persist only changes, and saves the previous state in the history table.
-  The "full" option saves all transactions into the temporal database
-  (i.e. this includes the latest state.)
-   This allows to only query the hostory table to get the full history of an entity.
-  */
-  full: false
-```
+The default values for options maintain backward compatibility with previous versions of sequelize-temporal.
+
+| Option        | Type    | Default Value  | Description                                                  |
+| ------------- | ------- | -------------- | ------------------------------------------------------------ |
+| `blocking`    | Boolean | `true`         | Runs the insert within the sequelize hook chain. Disable for increased performance without warranties. |
+| `full`        | Boolean | `false`        | **NOT RECOMMENDED FOR USE CURRENTLY**<br /><br />The description below describes the intended behavior based on the code present, but it doesn't appear to work properly.<br /><br />By default, model instances will only be created in Temporal tables on Sequelize's `beforeUpdate`, `beforeUpsert`, and `beforeDestroy` events. The end result is a table of previous states. The full history of an instance is only available in the Temporal table after an instance has been destroyed.<br /><br />Default Temporal tables can be queried to get the past history of an entity. The current state of the entity only exists in the main table.<br /><br />Full mode triggers Temporal record creation on `afterCreate`, `afterUpsert`, `afterUpdate`, `afterDestroy`, and `afterRestore`.  The end result is a Temporal table of all states, including the current state.<br /><br />Temporal tables created using full mode can be queried to get the full history of an entity. |
+| `modelPrefix` | String  | `''`           | Add a prefix to the Temporal model/table's name.             |
+| `modelSuffix` | String  | `'History'`    | Add a suffix to the Temporal model/table's name. This may be pluralized automatically by Sequelize for the Temporal table's name. |
+| `idColumn`    | String  | `'hid'`        | Name the ID column for the Temporal table.                   |
+| `dateColumn`  | String  | `'archivedAt'` | Name the date column for the Temporal table.                 |
+
 
 Details
 --------
 
-@See: https://wiki.postgresql.org/wiki/SQL2011Temporal
+See: https://wiki.postgresql.org/wiki/SQL2011Temporal
 
 ### History table
 
@@ -102,12 +101,16 @@ Triggers for storing old versions of rows to history table are inspired by refer
 
 If you only use Postgres, you might want to have a look at the [Temporal Table](https://github.com/arkhipov/temporal_tables) extension.
 
+
+
 License
 -------
 
+
+
 The MIT License (MIT)
 
-Copyright (c) 2015 BonaVal
+Copyright (c) 2015 BonaVal and other contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -126,3 +129,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+
+-------
+
+
+
+Forked from https://github.com/bonaval/sequelize-temporal
