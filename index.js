@@ -100,7 +100,7 @@ var Temporal = function(model, sequelize, temporalOptions){
     model.addHook('afterRestore', insertHook);
   } else {
     model.addHook('beforeUpdate', insertHook);
-    model.addHook('beforeUpsert'), insertHook);
+    model.addHook('beforeUpsert', insertHook);
     model.addHook('beforeDestroy', insertHook);
   }
 
